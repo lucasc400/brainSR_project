@@ -13,7 +13,6 @@ class ESPCNModel(nn.Module):
         upscale_factor = opt['upscale_factor']
         super(ESPCNModel, self).__init__()
 
-
         self.relu = nn.ReLU()
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
         self.conv2 = nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1))
@@ -98,4 +97,4 @@ class ESPCNModel(nn.Module):
     #         load_network(self.load_path_G, self.netG)
 
     def save(self, iter_label):
-        save_network(self.save_dir, self, 'ESPCN', iter_label, self.opt["gpu_ids"])
+        save_network(self.save_dir, self, 'ESPCN', iter_label, self.opt["gpu_ids"], self.optimizer)

@@ -20,14 +20,13 @@ class SRResNetModel(BaseModel):
         self.input_L = self.Tensor()
         self.input_H = self.Tensor()
 
-        self.device = opt['device']
+        self.device = opt["device"]
         if self.device == 'cuda':
             self.criterion = Loss(opt["train"].get("criterion"))().cuda(opt["gpu_ids"][0])
             self.netG = networks.define_G(opt).to(torch.device('cuda'))
 
         # Load pretrained_models
         self.load_path_G = opt["path"].get("pretrain_model_G")
-        self.load()
 
         # if opt["train"].get("lr_scheme") == 'multi_steps':
         #     self.lr_steps = self.opt["train"].get("lr_steps")
@@ -101,12 +100,12 @@ class SRResNetModel(BaseModel):
             load_network(self.load_path_G, self.netG)
 
     def save(self, iter_label):
-        save_network(self.save_dir, self.netG, 'G', iter_label, self.opt["gpu_ids"])
+        save_network(self.save_dir, self.netG, 'G', iter_label, self.opt["gpu_ids"], self.optimizer_G)
 
     def update_learning_rate(self, step=None, scheme=None):
         if scheme == 'multi_steps':
             if step in self.lr_steps:
-                for optimizer in self.optimizers:
+                for optimizer in self.optimizer_G:
                     for param_group in optimizer.param_groups:
                         param_group['lr'] = param_group['lr'] * self.lr_gamma
                 print('learning rate switches to next step.')

@@ -17,6 +17,10 @@ def create_model(opt):
         from .espcn import ESPCNModel
         model = ESPCNModel(opt)
 
+    elif opt["model"] == "sft_resnet":
+        from .sft_resnet_model import SFTResNetModel
+        model = SFTResNetModel(opt)
+
     else:
         raise NotImplementedError('Model [%s] not recognized.' % opt["model"])
 

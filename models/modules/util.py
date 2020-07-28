@@ -9,10 +9,13 @@ def get_network_description(network):
     return s, n
 
 # helper saving function
-def save_network(save_dir, network, network_label, iter_label, gpu_ids):
+def save_network(save_dir, network, network_label, iter_label, gpu_ids, optimizer):
     save_filename = '%s_%s.pth' % (iter_label, network_label)
     save_path = os.path.join(save_dir, save_filename)
-    torch.save(network.cpu().state_dict(), save_path) # network is wrapped by nn.DataParallel
+    torch.save(dict(iteration=iter_label,
+                    model=network.cpu().state_dict(),
+                    optimizer=optimizer.state_dict(),
+                    ), save_path)
     network.cuda(gpu_ids[0])
 
 # helper loading function
