@@ -99,8 +99,8 @@ class SRResNetModel(BaseModel):
             print('loading model for G [%s] ...' % self.load_path_G)
             load_network(self.load_path_G, self.netG)
 
-    def save(self, iter_label):
-        save_network(self.save_dir, self.netG, 'G', iter_label, self.opt["gpu_ids"], self.optimizer_G)
+    def save(self, iter_label, network_label='G'):
+        save_network(self.save_dir, self.netG, network_label, iter_label, self.opt["gpu_ids"], self.optimizer_G)
 
     def update_learning_rate(self, step=None, scheme=None):
         if scheme == 'multi_steps':

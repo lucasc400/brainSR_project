@@ -73,9 +73,9 @@ class ESPCNModel(nn.Module):
 
     def get_current_visuals(self):
         out_dict = OrderedDict()
-        out_dict['low-resolution'] = self.real_L.data[0]
-        out_dict['super-resolution'] = self.fake_H.data[0]
-        out_dict['ground-truth'] = self.real_H.data[0]
+        out_dict['low-resolution'] = self.real_L.data
+        out_dict['super-resolution'] = self.fake_H.data
+        out_dict['ground-truth'] = self.real_H.data
         return out_dict
 
     def write_description(self):
@@ -96,5 +96,5 @@ class ESPCNModel(nn.Module):
     #         print('loading model for G [%s] ...' % self.load_path_G)
     #         load_network(self.load_path_G, self.netG)
 
-    def save(self, iter_label):
-        save_network(self.save_dir, self, 'ESPCN', iter_label, self.opt["gpu_ids"], self.optimizer)
+    def save(self, iter_label, network_label='ESPCN'):
+        save_network(self.save_dir, self, network_label, iter_label, self.opt["gpu_ids"], self.optimizer)

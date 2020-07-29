@@ -97,6 +97,6 @@ class SFTResNetModel(BaseModel):
             print('loading model for SFTNET [%s] ...' % self.load_path_sftnet)
             load_network(self.load_path_sftnet, self.sft_net)
 
-    def save(self, iter_label):
-        save_network(self.save_dir, self.netG, 'SFT', iter_label, self.opt["gpu_ids"])
+    def save(self, iter_label, network_label='SFT'):
+        save_network(self.save_dir, self.sft_net, network_label, iter_label, self.opt["gpu_ids"])
 
