@@ -7,12 +7,13 @@ import torch.nn.init as init
 
 from models.modules.loss import Loss
 from models.modules.util import get_network_description, load_network, save_network
+from models.modules.scheduler import create_scheduler
 
 class ESPCNModel(nn.Module):
     def __init__(self, opt):
-        upscale_factor = opt['upscale_factor']
+        upscale_factor = opt["upscale_factor"]
         super(ESPCNModel, self).__init__()
-
+        self.opt = opt
         self.relu = nn.ReLU()
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
         self.conv2 = nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1))
@@ -28,11 +29,11 @@ class ESPCNModel(nn.Module):
         self.optimizer = torch.optim.Adam(self.parameters(), lr=self.lr, weight_decay=self.weight_decay)
 
         self.save_dir = opt["path"]["trained_models"]
-        self.opt = opt
-
+        
         self.device = opt.get('device')
         if self.device == 'cuda':
             self.to(torch.device('cuda'))
+        self.scheduler = create_scheduler(opt, self)
 
     def name(self):
         return 'ESPCNModel'
@@ -90,7 +91,14 @@ class ESPCNModel(nn.Module):
         # with open(network_path, 'w') as f:
         #     f.write(message)
         # os.chmod(network_path, S_IREAD|S_IRGRP|S_IROTH)
-
+    
+    def update_learning_rate(self, valid_PSNR):
+        current_lr = self.optimizer.state_dict()['param_groups'][0]['lr']
+        self.scheduler.step(valid_PSNR)
+        new_lr = self.scheduler.get_lr()[0]
+        if new_lr != current_lr:
+            print('Learning rate update! New learning rate:', new_lr)
+    
     # def load(self):
     #     if self.load_path_G is not None:
     #         print('loading model for G [%s] ...' % self.load_path_G)
@@ -98,3 +106,4 @@ class ESPCNModel(nn.Module):
 
     def save(self, iter_label, network_label='ESPCN'):
         save_network(self.save_dir, self, network_label, iter_label, self.opt["gpu_ids"], self.optimizer)
+        
