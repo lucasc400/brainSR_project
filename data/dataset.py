@@ -11,7 +11,8 @@ class brain_tumour_dataset(data.Dataset):
 
         # transform
         self.upscale_factor = opt["upscale_factor"]
-        self.input_transform = input_transform(upscale_factor=self.upscale_factor)
+        self.gaussian = opt.get("gaussian")
+        self.input_transform = input_transform(upscale_factor=self.upscale_factor, gaussian_opt=self.gaussian)
         self.target_transform = target_transform()
         self.label_transform = label_transform()
         self.scale = opt["scale"]

@@ -18,7 +18,7 @@ class Logger(object):
     def print_results(self, results, epoch, iters, time, mode):
         message = '(epoch: %3d, iters: %8d, time: %.3f) ' % (epoch, iters, time)
         for label, value in results.items():
-            message += '%s: %.6f ' % (label, value)
+            message += '%s: %.8f ' % (label, value)
         # Print in console
         print(message)
         # Write in log file

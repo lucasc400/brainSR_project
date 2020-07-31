@@ -93,11 +93,11 @@ class ESPCNModel(nn.Module):
         # os.chmod(network_path, S_IREAD|S_IRGRP|S_IROTH)
     
     def update_learning_rate(self, valid_PSNR):
-        current_lr = self.optimizer.state_dict()['param_groups'][0]['lr']
+        # current_lr = self.optimizer.state_dict()['param_groups'][0]['lr']
         self.scheduler.step(valid_PSNR)
-        new_lr = self.scheduler.get_lr()[0]
-        if new_lr != current_lr:
-            print('Learning rate update! New learning rate:', new_lr)
+        # new_lr = self.optimizer.state_dict()['param_groups'][0]['lr']
+        # if new_lr != current_lr:
+        #     print('Learning rate update! New learning rate:', new_lr)
     
     # def load(self):
     #     if self.load_path_G is not None:

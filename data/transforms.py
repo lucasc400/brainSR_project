@@ -1,6 +1,8 @@
 import torch
 import numpy as np
+import torch.nn as nn
 import torch.nn.functional as F
+from data.gaussian import GaussianSmoothing
 
 class input_transform(object):
   '''
@@ -12,14 +14,21 @@ class input_transform(object):
     Where batch_size = depth * MRI_parameters, and width and height are downsampled by upscale
     factor, using bilinear interpolation
   '''
-  def __init__(self, upscale_factor):
+  def __init__(self, upscale_factor, gaussian_opt):
     self.upscale_factor = upscale_factor
+    if gaussian_opt is not None:
+        self.gaussian = GaussianSmoothing(channels=1, kernel_size=gaussian_opt["kernel_size"], sigma=gaussian_opt["sigma"], dim=gaussian_opt["dim"])
+    elif gaussian_opt is None:
+        self.gaussian = None
+    
   def __call__(self, image):
 
     image = image.reshape(image.shape[0], image.shape[1], image.shape[2]*image.shape[3], order='F')
     image = image[:,:,:,np.newaxis] # add in a dimension for channel
     image = image.transpose((2,3,0,1)) # change order of axis to (batch_size * channel * width * height)
     image = torch.from_numpy(image)
+    if self.gaussian is not None:
+        image = self.gaussian(image)
     image = F.interpolate(image, size=(int(image.shape[2]/self.upscale_factor), int(image.shape[3]/self.upscale_factor)), mode='bilinear')
     return image
 
