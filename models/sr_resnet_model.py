@@ -9,10 +9,9 @@ import models.modules.block as B
 from models.modules.loss import Loss
 from models.modules.util import get_network_description, load_network, save_network
 from models.base_model import BaseModel
+from models.modules.scheduler import create_scheduler
 
 class SRResNetModel(BaseModel):
-
-
     def __init__(self, opt):
         super(SRResNetModel, self).initialize(opt)
         assert opt["is_train"]
@@ -28,16 +27,11 @@ class SRResNetModel(BaseModel):
         # Load pretrained_models
         self.load_path_G = opt["path"].get("pretrain_model_G")
 
-        # if opt["train"].get("lr_scheme") == 'multi_steps':
-        #     self.lr_steps = self.opt["train"].get("lr_steps")
-        #     self.lr_gamma = self.opt["train"].get("lr_gamma")
-
-        self.optimizers = []
 
         self.lr_G = opt["train"].get('lr_G')
         self.weight_decay_G = opt["train"].get("weight_decay_G") if opt["train"].get("weight_decay_G") else 0.0
-        self.optimizer_G = torch.optim.Adam(self.netG.parameters(), lr=self.lr_G, weight_decay=self.weight_decay_G)
-        self.optimizers.append(self.optimizer_G)
+        self.optimizer = torch.optim.Adam(self.netG.parameters(), lr=self.lr_G, weight_decay=self.weight_decay_G)
+        self.scheduler = create_scheduler(opt, self)
 
         print('---------- Model initialized -------------')
         self.write_description()
@@ -52,19 +46,19 @@ class SRResNetModel(BaseModel):
         self.real_H = input_H.requires_grad_().to(torch.device('cuda'))
         self.real_L = input_L.requires_grad_().to(torch.device('cuda'))
 
-    def forward_G(self):
+    def forward(self):
         self.fake_H = self.netG(self.real_L)
 
-    def backward_G(self):
+    def backward(self):
         self.loss = self.criterion(self.fake_H, self.real_H)
         self.loss.backward()
 
     def optimize_parameters(self, step):
         # G
-        self.forward_G()
-        self.optimizer_G.zero_grad()
-        self.backward_G()
-        self.optimizer_G.step()
+        self.forward()
+        self.optimizer.zero_grad()
+        self.backward()
+        self.optimizer.step()
 
     def val(self):
         self.fake_H = self.netG(self.real_L)
@@ -100,15 +94,10 @@ class SRResNetModel(BaseModel):
             load_network(self.load_path_G, self.netG)
 
     def save(self, iter_label, network_label='G'):
-        save_network(self.save_dir, self.netG, network_label, iter_label, self.opt["gpu_ids"], self.optimizer_G)
+        save_network(self.save_dir, self.netG, network_label, iter_label, self.opt["gpu_ids"], self.optimizer, self.scheduler)
 
-    def update_learning_rate(self, step=None, scheme=None):
-        if scheme == 'multi_steps':
-            if step in self.lr_steps:
-                for optimizer in self.optimizer_G:
-                    for param_group in optimizer.param_groups:
-                        param_group['lr'] = param_group['lr'] * self.lr_gamma
-                print('learning rate switches to next step.')
+    def update_learning_rate(self, valid_PSNR):
+        self.scheduler.step(valid_PSNR)
 
     def train(self):
         self.netG.train()

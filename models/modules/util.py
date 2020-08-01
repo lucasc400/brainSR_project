@@ -9,13 +9,16 @@ def get_network_description(network):
     return s, n
 
 # helper saving function
-def save_network(save_dir, network, network_label, iter_label, gpu_ids, optimizer):
+def save_network(save_dir, network, network_label, iter_label, gpu_ids, optimizer, scheduler):
     save_filename = '%s_%s.pth' % (iter_label, network_label)
     save_path = os.path.join(save_dir, save_filename)
-    torch.save(dict(iteration=iter_label,
-                    model=network.cpu().state_dict(),
-                    optimizer=optimizer.state_dict(),
-                    ), save_path)
+    output_dict = dict(iteration=iter_label,
+                       model=network.cpu().state_dict(),
+                       optimizer=optimizer.state_dict(),
+                       )
+    if scheduler is not None:
+        output_dict['scheduler'] = scheduler.state_dict()
+    torch.save(output_dict, save_path)
     network.cuda(gpu_ids[0])
 
 # helper loading function

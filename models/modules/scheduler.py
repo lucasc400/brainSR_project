@@ -10,9 +10,13 @@ def create_scheduler(opt, model):
         return
     
     if opt_scheduler["name"] == "ReduceLROnPlateau":
+        factor = opt_scheduler.get("factor") if opt_scheduler.get("factor") is not None else 0.2
+        threshold = opt_scheduler.get("threshold") if opt_scheduler.get("threshold") is not None else 0.05
+        patience = opt_scheduler.get("patience") if opt_scheduler.get("patience") is not None else 5
+        cooldown = opt_scheduler.get("cooldown") if opt_scheduler.get("cooldown") is not None else 0
         return ReduceLROnPlateau(model.optimizer, 
                                  mode = "max", 
-                                 factor = opt_scheduler.get("factor"), 
-                                 threshold = opt_scheduler.get("threshold"), 
-                                 patience = opt_scheduler.get("patience"),
-                                 cooldown = opt_scheduler.get("cooldown"))
+                                 factor = factor, 
+                                 threshold = threshold, 
+                                 patience = patience,
+                                 cooldown = cooldown)
