@@ -51,17 +51,19 @@ class label_transform(object):
   For a label with shape (155, 240, 240) with 3 classes,
   Return a tensor of shape (620, 3, 240, 240) where each channel maps a class
   '''
-  # def __init__(self, opt):
-  #   self.upscale_factor = opt["upscale_factor"]
+  def __init__(self, opt):
+    self.upscale_factor = opt["upscale_factor"]
+    self.class_values = opt.get("class_values")
+    if self.class_values is None:
+        self.class_values = [1., 2., 3.]
 
   def __call__(self, label):
 
     label = torch.from_numpy(label).float()
-    class_values = [1,2,3] # used instead of unique for speed
-    label = label.unsqueeze(0).repeat(3,1,1,1)
+    label = label.unsqueeze(0).repeat(len(self.class_values),1,1,1)
 #    label = F.interpolate(label, scale_factor=1/self.upscale_factor, mode='bilinear')
 
-    for dimension, value in enumerate(class_values):
+    for dimension, value in enumerate(self.class_values):
       label_channel = torch.where(label[dimension,:,:,:] >= value, label[dimension,:,:,:], torch.tensor(0.))
       label_channel = torch.where(label[dimension,:,:,:] < value, label_channel, torch.tensor(1.))
       label[dimension,:,:,:] = label_channel

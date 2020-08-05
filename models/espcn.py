@@ -105,5 +105,5 @@ class ESPCNModel(nn.Module):
     #         load_network(self.load_path_G, self.netG)
 
     def save(self, iter_label, network_label='ESPCN'):
-        save_network(self.save_dir, self, network_label, iter_label, self.opt["gpu_ids"], self.optimizer)
+        save_network(self.save_dir, self, network_label, iter_label, self.opt["gpu_ids"], self.optimizer, self.scheduler)
         

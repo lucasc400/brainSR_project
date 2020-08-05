@@ -14,7 +14,7 @@ class brain_tumour_dataset(data.Dataset):
         self.gaussian = opt.get("gaussian")
         self.input_transform = input_transform(upscale_factor=self.upscale_factor, gaussian_opt=self.gaussian)
         self.target_transform = target_transform()
-        self.label_transform = label_transform()
+        self.label_transform = label_transform(opt)
         self.scale = opt["scale"]
 
         # training
@@ -55,11 +55,12 @@ class brain_tumour_dataset(data.Dataset):
             batch_index = np.random.randint(0, input.shape[0], self.batch_size)
             input = input[batch_index, :, :, :]
             target = target[batch_index, :, :, :]
-            if self.use_condition is True:
-                if label is not None:
-                    label = label[batch_index, :, :, :]
-                    input = (input, label)
-
+            if self.use_condition is True and label is not None:
+                label = label[batch_index, :, :, :]
+        
+        if self.use_condition is True and label is not None:
+            target = (target, label)
+        
         return dict(L=input, H=target)
 
     def __len__(self):
