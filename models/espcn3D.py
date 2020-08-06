@@ -15,10 +15,10 @@ class ESPCN3DModel(nn.Module):
         self.upscale_factor = opt["upscale_factor"]
         self.opt = opt
         self.relu = nn.ReLU()
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
-        self.conv2 = nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1))
-        self.conv3 = nn.Conv2d(64, 32, (3, 3), (1, 1), (1, 1))
-        self.conv4 = nn.Conv2d(32, self.upscale_factor ** 3, (3, 3), (1, 1), (1, 1))
+        self.conv1 = nn.Conv3d(in_channels=1, out_channels=64, kernel_size=(5, 5, 5), stride=(1, 1, 1), padding=(2, 2, 2))
+        self.conv2 = nn.Conv3d(64, 64, (3, 3, 3), (1, 1, 1), (1, 1, 1))
+        self.conv3 = nn.Conv3d(64, 32, (3, 3, 3), (1, 1, 1), (1, 1, 1))
+        self.conv4 = nn.Conv3d(32, self.upscale_factor ** 3, (3, 3, 3), (1, 1, 1), (1, 1, 1))
         self.pixel_shuffle = my_pixel_shuffle(self.upscale_factor)
 
         self._initialize_weights()
